@@ -240,7 +240,6 @@ subj_trials = repeatedly(make_trials, 30)
 # %% --------
 
 
-points_per_cent = 3
 
 dest = "static/json/config"
 rm(dest, recursive=true)
@@ -251,6 +250,7 @@ foreach(enumerate(subj_trials)) do (i, trials)
     # else
     #     parameters = (;score_limit=250)
     # end
+    parameters = (;)
 
     write("$dest/$i.json", json((;parameters, trials)))
     println("$dest/$i.json")
