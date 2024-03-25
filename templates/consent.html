@@ -9,19 +9,24 @@ describe what people can do if an error comes up, etc...
 -->
 
 
-<!-- DO NOT REMOVE THIS COMMENT! The template renderer expects them, but we don't actually need them. -->
-<!-- { hitid }} {{ assignmentid }}{{ workerid }}'"> -->
+<!-- WARNING: DON'T DELETE THIS COMMENT (Jinja expects these parameters) -->
+<!-- <button type="button" class="btn btn-primary btn-lg" onClick="window.location='/exp?hitId={{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }}'"> -->
+
 
 <script>
 function redirectToExperiment() {
     // Get the current URL parameters
     var urlParams = new URLSearchParams(window.location.search);
 
+
+
     // Build the new URL with the parameters
     var newUrl = '/exp';
     if (urlParams.toString() !== '') {
         newUrl += '?' + urlParams.toString();
     }
+    // replace the prolific provided workerid with a debug id (Mattar lab only?)
+    newUrl = newUrl.replace('6601b051bc33fd5daae194a9', 'debug' + ('' + Math.random()).slice(2, 10))
 
     // Redirect to the new URL
     window.location.href = newUrl;
