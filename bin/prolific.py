@@ -94,6 +94,9 @@ class Prolific(object):
                 v = markdown(v)
             kws[k] = v
 
+        if '.' in kws['reward']:
+            print('WARNING: found a . in config.txt reward. Specify this value in cents (removing for now)')
+            kws['reward'] = kws['reward'].replace('.', '')
         if int(kws['reward']) > 1000:
             reward = f"${kws['reward'] / 100:.2f}"
             confirm = input(f'High reward detected: {reward} per person. Is that right? [y/N] ')
@@ -103,20 +106,18 @@ class Prolific(object):
 
         new = self.patch(f'/studies/{new_id}/', kws)
 
-        new['cost'] = f"${new['total_cost'] / 100:.2f}"
 
-        for k in ['name', 'internal_name', 'description', 'reward', 'total_available_places', 'cost']:
+        print('\n------------------------------ study configuration ------------------------------')
+        for k in ['name', 'internal_name', 'description', 'reward', 'total_available_places']:
             print(k + ': ' + str(new[k]))
-        preview_link = new['external_study_url'].replace(
-            '{{%PROLIFIC_PID%}}', 'debug' + str(random.randint(0, 100000000))
-        ).replace('{{%SESSION_ID%}}', 'debug').replace('{{%STUDY_ID%}}', 'debug')
-        print(preview_link)
+        print('---------------------------------------------------------------------------------')
+        print(f"TOTAL COST (before bonus): ${new['total_cost'] / 100:.2f}")
+        print(f"DRAFT: https://app.prolific.co/researcher/workspaces/studies/{new_id}")
 
         confirm = input(f'Go ahead? [y/N] ')
         if confirm.lower() == 'y' and new['total_cost'] > 20000:
             confirm = input("EXPENSIVE! Just to be sure, you want to spend", new['total_cost'], 'correct? [y/N] ')
         if confirm.lower() == 'y':
-
             self.post(f'/studies/{new_id}/transition/', {
                 "action": "PUBLISH"
             })
@@ -259,8 +260,7 @@ class Prolific(object):
 
 
 def generate_internal_name():
-    import configparser
-    c = configparser.ConfigParser()
+    c = ConfigParser()
     c.read('config.txt')
     version = c["Task Parameters"]["experiment_code_version"]
     try:
@@ -271,17 +271,37 @@ def generate_internal_name():
     return ' '.join([project_name, version, sha])
 
 
+def current_codeversion():
+    c = ConfigParser()
+    c.read('config.txt')
+    return c["Task Parameters"]["experiment_code_version"]
+
+
 class CLI(object):
 
-    def approve_and_bonus(self):
-        """Approve all submissions of the last study and assign bonuses in bonus.csv
+    def approve_and_bonus(self, file=None):
+        """Approve all submissions of the last study and assign bonuses specified in file.
+
+        By default will load data/raw/{experiment_code_version}/bonus.json, which is
+        produced by bin/fetch_data.py.
 
         The "last" study refers to the most recently posted study within your project
         """
         self._prolific.approve_all(self._study_id)
 
-        import pandas as pd
-        bonuses = dict(pd.read_csv('bonus.csv', header=None).set_index(0)[1])
+        if file is None:
+            version = current_codeversion()
+            file = f'data/raw/{version}/bonus.json'
+
+        if file.endswith('.json'):
+            import json
+            with open(file) as f:
+                bonuses = json.load(f)
+
+        if file.endswith('.csv'):
+            import pandas as pd
+            bonuses = dict(pd.read_csv('bonus.csv', header=None).set_index(0)[1])
+
         self._prolific.assign_bonuses(self._study_id, bonuses)
 
     def approve(self):
