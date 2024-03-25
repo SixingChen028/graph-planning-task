@@ -120,6 +120,36 @@ async function runExperiment() {
     }
   }
 
+  async function motivation() {
+    DISPLAY.empty()
+    let div = $('<div>').appendTo(DISPLAY).addClass('text')
+    $('<p>').appendTo(div).html(markdown(`
+      # Quick question
+    `))
+
+    let motivation = new Slider({
+      prompt: 'How motivated did you feel to score points?',
+      leftLabel: 'not at all motivated',
+      rightLabel: 'very motivated'
+    }).appendTo(div)
+
+    let speedacc = new Slider({
+      prompt: 'How do you think you balanced <b>speed</b> (doing many rounds) with <b>accuracy</b> (getting the most points possible on every round)?',
+      leftLabel: 'only speed',
+      rightLabel: 'only accuracy'
+    }).appendTo(div)
+
+    // new RadioButtons({
+    //   prompt: 'How motivated did you feel to score points quickly?',
+    //   choices: ['hardly', 'a bit', 'fairly', 'very']
+    // }).appendTo(div)
+
+    await button(div, 'submit').clicked
+    // this information is already in the log, but let's put it in one place
+    logEvent('motivation.submitted', getInputValues({motivation, speedacc}))
+  }
+
+
   async function survey() {
     _.shuffle(CLINICAL_SURVEY.pages.slice(0,-1)).forEach((x, i) => {
       x.elements[0].rows = _.shuffle(x.elements[0].rows)
@@ -138,9 +168,7 @@ async function runExperiment() {
       If you have any feedback please provide it below (feel free to leave it empty!)
     `))
 
-    let feedback = text_box(div, `
-      Do you have any other feedback? (optional)
-    `)
+    let feedback = text_box(div)
 
     await button(div, 'submit').clicked
     // this information is already in the log, but let's put it in one place
@@ -152,6 +180,7 @@ async function runExperiment() {
   await runTimeline(
     instructions,
     main,
+    motivation,
     survey,
     debrief
   )
