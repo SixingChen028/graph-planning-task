@@ -21,9 +21,9 @@ async function runExperiment() {
     show_predecessors: false,
     show_successor_rewards: false,
     reveal_by: 'hover',
-    // score_limit: 200,
-    time_limit: 600,
-    points_per_cent: 2,
+    score_limit: 300,
+    // time_limit: 600,
+    points_per_cent: 3,
   }, config.parameters)
   console.log('config.parameters', config.parameters)
 
