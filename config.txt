@@ -11,16 +11,13 @@ table_name = participants
 
 [Prolific]
 name = Puzzle Game
-reward = 275
+reward = 400
+external_study_url = https://graph-planning-634e23467632.herokuapp.com/consent?mode=live&hitId=prolific&workerId={{%%PROLIFIC_PID%%}}&STUDY_ID={{%%STUDY_ID%%}}&assignmentId={{%%SESSION_ID%%}}
 total_available_places = 2
 estimated_completion_time = 20
 description =
     In this study, you will solve a series of puzzles and then fill
     out a survey about your mental health.
-
-    Based on your performance, you will earn **a bonus of up to $1.50!** (USD)
-    With the bonus, the median hourly wage for this study is around **$12/hr**.
-
 
 [Server Parameters]
 host = 0.0.0.0
