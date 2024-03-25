@@ -10,7 +10,7 @@ async function runExperiment() {
   const config = await $.getJSON(`static/json/config/${CONDITION+1}.json`)
   PARAMS = _.merge({
     eye_tracking: false,
-    hover_edges: true,
+    hover_edges: false,
     hover_rewards: true,
     use_n_steps: false,
     vary_transition: true,

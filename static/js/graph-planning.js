@@ -46,6 +46,24 @@ function circleXY(N) {
   });
 }
 
+function treeXY(start, graph) {
+  let xy = Array(graph.states.length).fill([])
+
+  function recurse(s, x, depth) {
+    console.log('recurse', s, x, depth)
+    let y = depth * .2
+    xy[s] = [x, y]
+
+    let spread = 2.1 ** (4 - depth) / 70
+    let xs = [x - spread, x + spread]
+    graph.successors(s).forEach((s1, i) => {
+      recurse(s1, xs[i], depth + 1)
+    })
+  }
+  recurse(start, 0.5, 0)
+  return xy
+}
+
 
 class CircleGraph {
   constructor(options) {
@@ -83,6 +101,10 @@ class CircleGraph {
     // options.graphics = this.rewards.map(x => options.rewardGraphics[x])
 
     this.graph = new Graph(options.graph)
+
+    options.graphRenderOptions.fixedXY = treeXY(options.start, this.graph)
+    window.xy = options.graphRenderOptions.fixedXY
+
     this.el = renderCircleGraph(
       this.graph, options.goal,
       {
