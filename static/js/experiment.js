@@ -22,7 +22,7 @@ async function runExperiment() {
     show_successor_rewards: false,
     reveal_by: 'hover',
     score_limit: 300,
-    // time_limit: 600,
+    time_limit: undefined,
     points_per_cent: 3,
   }, config.parameters)
   console.log('config.parameters', config.parameters)
