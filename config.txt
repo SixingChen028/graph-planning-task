@@ -1,5 +1,5 @@
 [Task Parameters]
-experiment_code_version = v21
+experiment_code_version = v22
 # this number determines how many values the CONDITION variable can take
 num_conds = 30
 # don't change this
