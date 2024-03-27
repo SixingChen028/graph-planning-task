@@ -114,6 +114,15 @@ class Prolific(object):
         print(f"TOTAL COST (before bonus): ${new['total_cost'] / 100:.2f}")
         print(f"DRAFT: https://app.prolific.co/researcher/workspaces/studies/{new_id}")
 
+        study_link = (new['external_study_url']
+            .replace('{{%PROLIFIC_PID%}}', 'debug' + str(random.randint(0, 100000)))
+            .replace('{{%STUDY_ID%}}', 'debug')
+            .replace('{{%SESSION_ID%}}', 'debug')
+        )
+
+        print("STUDY LINK:", study_link)
+
+
         confirm = input(f'Go ahead? [y/N] ')
         if confirm.lower() == 'y' and new['total_cost'] > 20000:
             confirm = input("EXPENSIVE! Just to be sure, you want to spend", new['total_cost'], 'correct? [y/N] ')
