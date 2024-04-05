@@ -72,7 +72,7 @@ class CircleGraph {
       edgeShow: (() => true),
       show_steps: options.n_steps > 0,
       show_points: true,
-      show_successor_rewards: true,
+      show_successor_rewards: false,
       keep_hover: true,
       revealed: false,
     })
@@ -102,8 +102,9 @@ class CircleGraph {
 
     this.graph = new Graph(options.graph)
 
+    // SIXING: you'll want to remove this line
     options.graphRenderOptions.fixedXY = treeXY(options.start, this.graph)
-    window.xy = options.graphRenderOptions.fixedXY
+
 
     this.el = renderCircleGraph(
       this.graph, options.goal,
@@ -113,13 +114,16 @@ class CircleGraph {
         ...options.graphRenderOptions,
       }
     )
-    $(this.el).hide()
+    $(this.el)
+    // .css('border', 'thick black solid')  // useful for debugging
+    .hide()
 
     this.graphContainer = $("<div>")
     .css({
       margin: 'auto',
       width: options.graphRenderOptions.width,
       height: options.graphRenderOptions.height,
+      // transform: `scale(${scale})`
     })
     .appendTo(this.root)
     .append(this.el)
@@ -779,15 +783,16 @@ function renderCircleGraph(graph, goal, options) {
   // Controls how far the key is from the node center. Scales keyWidth/2.
   const keyDistanceFactor = options.keyDistanceFactor || 1.4;
 
-  const width = options.width;
-  const height = options.height;
+  const scale = options.scale;
+  const width = options.width / scale;
+  const height = options.height / scale;
 
   const xy = graphXY(
     graph,
     width, height,
     // Scales edges and keys in. Good for when drawn in a circle
     // since it can help avoid edges overlapping neighboring nodes.
-    options.scaleEdgeFactor || 0.95,
+    options.scaleEdgeFactor || 1,
     options.fixedXY,
   );
 
@@ -836,12 +841,7 @@ function renderCircleGraph(graph, goal, options) {
   for (const state of graph.states) {
     let [x, y] = xy.scaled[state];
     graph.successors(state).forEach((successor, idx) => {
-      // if (state >= successor) {
-      //   return;
-      // }
       const e = xy.edge(state, successor);
-      // const opacity = options.edgeShow(state, successor) ? 1 : 0;
-      // opacity: ${opacity};
       succ.push(`
         <div class="GraphNavigation-edge GraphNavigation-edge-${state}-${successor}" style="
         width: ${e.norm}px;
@@ -849,14 +849,25 @@ function renderCircleGraph(graph, goal, options) {
         "></div>
       `);
 
-      // We also add the key labels here
       addArrow(state, successor, e.norm, e.rot);
-      // addArrow(successor, state, e.norm);
     });
   }
 
+      // width: width / scale,
+
+      // height: height / scale
+
+  // .css({transformOrigin: 'top left', transform: `scale(${scale})`})
+
+
   return parseHTML(`
-  <div class="GraphNavigation withGraphic" style="width: ${width}px; height: ${height}px;">
+  <div class="GraphNavigation withGraphic"
+      style="
+        width: ${width}px;
+        height: ${height}px;
+        transform-origin: top left;
+        transform: scale(${scale});
+      ">
     ${arrows.join('')}
     ${succ.join('')}
     ${shadowStates.join('')}
@@ -909,7 +920,6 @@ function setCurrentState(display_element, graph, state, options) {
 
   if (options.onlyShowCurrentEdges) {
     for (const el of display_element.querySelectorAll('.GraphNavigation-edge,.GraphNavigation-arrow')) {
-    // for (const el of display_element.querySelectorAll('.GraphNavigation-edge')) {
       el.style.opacity = 0;
     }
   }
@@ -922,28 +932,8 @@ function setCurrentState(display_element, graph, state, options) {
     // Set current edges
     let el = queryEdge(display_element, state, successor);
     el.classList.add('GraphNavigation-currentEdge');
-    // el.classList.add(`GraphNavigation-currentEdge-${keyForCSSClass(successorKeys[idx])}`);
     if (options.onlyShowCurrentEdges) {
       el.style.opacity = 1;
     }
-
-    // Now setting active keys
-    // el = display_element.querySelector(`.GraphNavigation-arrow-${state}-${successor}`);
-    // el.classList.add('GraphNavigation-currentKey');
-    // if (options.onlyShowCurrentEdges) {
-    //   el.style.opacity = 1;
-    // }
   });
-}
-
-function renderKeyInstruction(keys) {
-  function renderInputInstruction(inst) {
-    return `<span style="border: 1px solid black; border-radius: 3px; padding: 3px; font-weight: bold; display: inline-block;">${inst}</span>`;
-  }
-
-  if (keys.accept == 'Q') {
-    return `${renderInputInstruction('Yes (q)')} &nbsp; ${renderInputInstruction('No (p)')}`;
-  } else {
-    return `${renderInputInstruction('No (q)')} &nbsp; ${renderInputInstruction('Yes (p)')}`;
-  }
 }
