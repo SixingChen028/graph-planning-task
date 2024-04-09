@@ -4,9 +4,9 @@ function makeGlobal(obj) {
   Object.assign(window, obj)
 }
 
-
-
-
+function randomUUID() {
+  Date.now().toString(36) + Math.random().toString(36).substring(2)
+}
 
 class Bonus {
   constructor(options) {

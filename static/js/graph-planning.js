@@ -77,7 +77,7 @@ class CircleGraph {
       revealed: false,
     })
     // successorKeys:  options.graphRenderOptions.successorKeys
-    this.trialId = crypto.randomUUID()
+    this.trialId = randomUUID()
     this.logEvent('graph.construct', _.pick(this.options,
       'graph', 'n_steps', 'rewards', 'start', 'hover_edges', 'hover_rewards', 'expansions'
     ))
@@ -103,7 +103,7 @@ class CircleGraph {
     this.graph = new Graph(options.graph)
 
     // SIXING: you'll want to remove this line
-    options.graphRenderOptions.fixedXY = treeXY(options.start, this.graph)
+    // options.graphRenderOptions.fixedXY = treeXY(options.start, this.graph)
 
 
     this.el = renderCircleGraph(
