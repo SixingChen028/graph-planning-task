@@ -426,6 +426,10 @@ class CircleGraph {
           g.states.filter(s => !g.successors(this.state).includes(s))
         ),
       });
+      this.logEvent('graph.choice', {state})
+
+      await this.executeRollout()
+
       if (this.options.forced_hovers) {
         this.hideAllEdges()
         this.showEdge(this.state, state)
@@ -492,6 +496,17 @@ class CircleGraph {
       await getKeyPress(['t', 'space'])
       // this.unhighlight(a.state, '3')
       this.unhighlight(a2?.state, '2')
+    }
+  }
+
+  async executeRollout() {
+    let children = this.graph.successors(this.state)
+    if (children.length == 0) {
+      return
+    } else {
+      let child = _.sample(children)
+      this.visitState(child)
+      await sleep(500)
     }
   }
 
