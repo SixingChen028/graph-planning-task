@@ -37,6 +37,7 @@ class Graph {
   }
 }
 
+// original version
 function circleXY(N) {
   return _.range(N).map(idx => {
     const angle = 3 * Math.PI / 2 + (idx * 2 * Math.PI / N);
@@ -45,6 +46,150 @@ function circleXY(N) {
     return [x, y];
   });
 }
+
+// function traverseTree(numNodes) {
+//   const traversalOrder = [];
+
+//   function traverse(nodeIndex) {
+//     if (nodeIndex >= numNodes || nodeIndex < 0) {
+//       return;
+//     }
+
+//     traversalOrder.push(nodeIndex);
+
+//     const leftChild = 2 * nodeIndex + 1;
+//     const rightChild = 2 * nodeIndex + 2;
+//     traverse(leftChild);
+//     traverse(rightChild);
+//   }
+
+//   traverse(0);
+//   return traversalOrder;
+// }
+
+// no shuffling version
+// function circleXY(N) {
+//   const branchingFactor = 2;
+//   const positions = [[0.5, 0.0]];
+
+//   let depth = 0;
+//   let level = 0;
+//   while (level < N - 1) {
+//     depth += 1;
+//     level += branchingFactor ** depth;
+//   }
+
+//   const deltaY = 1.0 / depth;
+
+//   for (let d = 1; d <= depth; d++) {
+//     const deltaX = 1.0 / (branchingFactor ** d);
+//     for (let i = 0; i < branchingFactor ** d; i++) {
+//       const x = (i + 0.5) * deltaX;
+//       const y = d * deltaY;
+//       positions.push([x, y]);
+//     }
+//   }
+
+//   const positionsOrdered = [];
+//   const order = traverseTree(N);
+//   for (let i = 0; i < N; i++) {
+//     positionsOrdered.push(positions[order[i]]);
+//   }
+
+//   return positionsOrdered;
+// }
+
+// function circleXY(N) {
+//   const branchingFactor = 2;
+//   const positions = [[0.5, 0.0]];
+//   let depth = 0;
+//   let level = 0;
+
+//   while (level < N - 1) {
+//     depth += 1;
+//     level += branchingFactor ** depth;
+//   }
+
+//   const deltaY = 1.0 / depth;
+
+//   for (let d = 1; d <= depth; d++) {
+//     const deltaX = 1.0 / (branchingFactor ** d);
+//     const levelPositions = [];
+
+//     for (let i = 0; i < branchingFactor ** d; i++) {
+//       const x = (i + 0.5) * deltaX;
+//       const y = d * deltaY;
+//       levelPositions.push([x, y]);
+//     }
+
+//     // Shuffle positions at this depth
+//     for (let i = levelPositions.length - 1; i > 0; i--) {
+//       const j = Math.floor(Math.random() * (i + 1));
+//       [levelPositions[i], levelPositions[j]] = [levelPositions[j], levelPositions[i]];
+//     }
+
+//     positions.push(...levelPositions);
+//   }
+
+//   const positionsOrdered = [];
+//   const order = traverseTree(N);
+
+//   for (let i = 0; i < N; i++) {
+//     positionsOrdered.push(positions[order[i]]);
+//   }
+
+//   return positionsOrdered;
+// }
+
+
+// function circleXY(N) {
+//   const branchingFactor = 2;
+//   const positions = [[0.5, 0.0]];
+//   let depth = 0;
+//   let level = 0;
+
+//   while (level < N - 1) {
+//     depth += 1;
+//     level += branchingFactor ** depth;
+//   }
+
+//   const deltaY = 1 / ((depth ) * (depth + 1) / 2);
+
+//   for (let d = 1; d <= depth; d++) {
+//     const deltaX = 1.0 / (branchingFactor ** d);
+//     const levelPositions = [];
+
+//     for (let i = 0; i < branchingFactor ** d; i++) {
+//       const x = (i + 0.5) * deltaX;
+//       const y = (d * (d + 1)) / 2 * deltaY;
+//       levelPositions.push([x, y]);
+//     }
+
+//     // Shuffle positions at this depth
+//     for (let i = levelPositions.length - 1; i > 0; i--) {
+//       const j = Math.floor(Math.random() * (i + 1));
+//       [levelPositions[i], levelPositions[j]] = [levelPositions[j], levelPositions[i]];
+//     }
+
+//     positions.push(...levelPositions);
+//   }
+
+//   const positionsOrdered = [];
+//   const order = traverseTree(N);
+
+//   for (let i = 0; i < N; i++) {
+//     positionsOrdered.push(positions[order[i]]);
+//   }
+
+//   return positionsOrdered;
+// }
+
+
+
+
+
+
+
 
 function treeXY(start, graph) {
   let xy = Array(graph.states.length).fill([])
@@ -138,15 +283,15 @@ class CircleGraph {
     return this
   }
 
-  async run(display) {
+  async run(display) { // main function of a trial
     if (display) this.attach(display)
 
     this.setCurrentState(this.options.start)
     await this.showStartScreen()
     if (!this.options.revealed) {
-      await this.plan()
+      await this.plan() // planning phase
     }
-    await this.navigate()
+    await this.navigate() // main trial phase
   }
 
   logEvent(event, info={}) {
@@ -268,7 +413,7 @@ class CircleGraph {
     if (this.planningPhaseActive) return
     this.planningPhaseActive = true
 
-    $('.GraphNavigation').css('opacity', .7)
+    $('.GraphNavigation').css('opacity', 1.)
 
 
     let transition = '300ms'
@@ -418,7 +563,7 @@ class CircleGraph {
     }
   }
 
-  async navigate(options) {
+  async navigate(options) { // main function
     let path = []
     this.logEvent('graph.navigate', options)
     options = options || {};
@@ -452,10 +597,6 @@ class CircleGraph {
           g.states.filter(s => !g.successors(this.state).includes(s))
         ),
       });
-      this.logEvent('graph.choice', {state})
-
-      await this.executeRollout()
-
       if (this.options.forced_hovers) {
         this.hideAllEdges()
         this.showEdge(this.state, state)
@@ -660,12 +801,66 @@ class CircleGraph {
 
     // we have to use the default querySelector because this.el hasn't
     // been added to the DOM yet
+    // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).html(
+    //   $('<div>', {'class': 'GraphReward'}).html(`
+    //     ${reward == 0 ? '' : ensureSign(reward)}
+    //   `).addClass(reward < 0 ? "loss" : "win")
+    // )
+
+    
+    //// red or green
+    // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).css({
+    //   backgroundColor: reward > 0 ? "red" : "green"
+    // })
+
+    // gradient
+    // Define the color gradient
+    const colorGradient = {
+      "-8": "#00FF00",
+      "-4": "#33FF00",
+      "-2": "#66FF00",
+      "-1": "#99FF00",
+      "1": "#FF3300",
+      "2": "#FF6600",
+      "4": "#FF9900",
+      "8": "#FFCC00"
+    };
+
+    // // Set node color based on reward
+    // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).css({
+    //   backgroundColor: colorGradient[reward]
+    // });
+
+    // hovering
+    // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).html(
+    //   $('<div>', {'class': 'GraphReward'}).css({
+    //     width: '7rem',
+    //     height: '7rem',
+    //     borderRadius: '100%',
+    //     position: 'static',
+    //     backgroundColor: colorGradient[reward],
+    //   })
+    // )
     $(this.el.querySelector(`.GraphNavigation-State-${state}`)).html(
-      $('<div>', {'class': 'GraphReward'}).html(`
-        ${reward == 0 ? '' : ensureSign(reward)}
-      `).addClass(reward < 0 ? "loss" : "win")
-    )
+      $('<div>', {'class': 'GraphReward'}).css({
+        width: '6.6rem',
+        height: '6.6rem',
+        borderRadius: '100%',
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: colorGradient[reward],
+      })
+    );
+    
+
   }
+  
+
+
+
+  
 
   setRewards(rewards) {
     for (let s of _.range(this.rewards.length)) {
