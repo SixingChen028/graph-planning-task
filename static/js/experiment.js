@@ -9,7 +9,7 @@ async function runExperiment() {
   // load configuration and set up parameters
   const config = await $.getJSON(`static/json/config/${CONDITION+1}.json`)
   PARAMS = _.merge({
-    hover_edges: false,
+    hover_edges: true,
     revealed: false,  // disable
     hover_rewards: true,
     keep_hover: true,
@@ -22,8 +22,8 @@ async function runExperiment() {
   PARAMS.graphRenderOptions = {
     onlyShowCurrentEdges: false,
     scale: .4, // scales size of nodes, numbers, arrows, edge width
-    width: 700,
-    height: 700,
+    width: 600,
+    height: 600,
     fixedXY: circleXY(config.trials.main[0].graph.length)
     // fixedXY: PARAMS.graphCoordinates // SIXING: define this and delete previous line
   };

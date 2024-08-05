@@ -35,78 +35,142 @@ class GraphInstructions extends Instructions {
     this.setPrompt(`Welcome! In this experiment, you will play a game on the board shown below.`)
     await this.button()
 
-    this.setPrompt(`Your current location on the board is highlighted in blue.`)
+    this.setPrompt(`Your current location on the board is highlighted in red.`)
     cg.setCurrentState(trial.start)
     await this.button()
 
-    this.setPrompt(`You can move by clicking on a location that has an arrow pointing<br>from your current location. Try it now!`)
+    this.setPrompt(`You can move one step by clicking on a location that has an arrow pointing from your current location.`)
     let next_states = cg.graph.successors(trial.start)
     for (const s of next_states) {
       $(`.GraphNavigation-State-${s}`).addClass('GraphNavigation-State-Highlighted')
     }
+    await this.button()
+
+    this.setPrompt(`After the first step, your location will move **randomly** until it reaches a location with no outgoing connections.`)
+    
+    // Function to perform BFS and find leaf nodes
+    function findLeafNodes(graph, start) {
+      let visited = new Set();
+      let queue = [start];
+      let leafNodes = [];
+
+      while (queue.length > 0) {
+        let current = queue.shift();
+        visited.add(current);
+        let successors = graph.successors(current);
+
+        // If no successors, it's a leaf node
+        if (!successors || successors.length === 0) {
+          leafNodes.push(current);
+        } else {
+          // Add unvisited successors to the queue
+          for (let successor of successors) {
+            if (!visited.has(successor)) {
+              queue.push(successor);
+            }
+          }
+        }
+      }
+
+      return leafNodes;
+    }
+
+    // Assuming `trial.start` is the root node
+    let root = trial.start;
+    let leaf_nodes = findLeafNodes(cg.graph, root);
+    
+    // Highlight the leaf nodes
+    for (const leaf of leaf_nodes) {
+      $(`.GraphNavigation-State-${leaf}`).addClass('GraphNavigation-State-Highlighted2')
+    }
+    await this.button()
+
+    this.setPrompt(`When you get to a location with no outgoing connections, the round ends.`)
+    await this.button()
+
+    this.setPrompt(`Try it now!`)
 
     console.log('cg.graph', cg.graph)
-    await cg.navigate({n_steps: 1, leave_state: true})
-    $(`.GraphNavigation-State`).removeClass('GraphNavigation-State-Highlighted')
-
-    this.setPrompt(`
-      The goal of the game is to collect points on the board.<br>
-      Try collecting this +4!
-    `)
-    let goal = _.sample(cg.graph.successors(cg.state))
-    // $("#gn-points").show()
-    cg.setReward(goal, 4)
-    console.log('goal', goal)
-    await cg.navigate({n_steps: -1, goal, leave_state: true})
+    await cg.navigate({n_steps: 1, leave_state: false})
+    // $(`.GraphNavigation-State`).removeClass('GraphNavigation-State-Highlighted')
 
     // this.setPrompt(`
-    //   In the non-practice games, those points will become a cash bonus!<br>
-    //   (${trial.bonus.describeScheme()})
+    //   The goal of the game is to collect points on the board.<br>
+    //   Try collecting this +4!
     // `)
-    // await this.button()
+    // let goal = _.sample(cg.graph.successors(cg.state))
+    // // $("#gn-points").show()
+    // cg.setReward(goal, 4)
+    // console.log('goal', goal)
+    // await cg.navigate({n_steps: -1, goal, leave_state: true})
 
-    this.setPrompt(`
-      Now try collecting this one.
-    `)
+    // // this.setPrompt(`
+    // //   In the non-practice games, those points will become a cash bonus!<br>
+    // //   (${trial.bonus.describeScheme()})
+    // // `)
+    // // await this.button()
 
-    goal = _.sample(cg.graph.successors(cg.state))
-    cg.setReward(goal, -4)
-    await cg.navigate({n_steps: -1, goal, leave_open: true})
+    // this.setPrompt(`
+    //   Now try collecting this one.
+    // `)
 
-    this.setPrompt(`
-      <i>Ouch!</i> You lost 4 points for collecting that one!
-    `)
+    // goal = _.sample(cg.graph.successors(cg.state))
+    // cg.setReward(goal, -4)
+    // await cg.navigate({n_steps: -1, goal, leave_open: true})
+
+    // this.setPrompt(`
+    //   <i>Ouch!</i> You lost 4 points for collecting that one!
+    // `)
+
     cg.removeGraph()
 
     await this.button()
     this.runNext()
   }
 
+  async stage_color() {
+
+    let trial = {...this.trials.color[0], revealed: true}
+    let cg = new CircleGraph(trial).attach(this.content);
+    cg.showGraph()
+    cg.setCurrentState(trial.start)
+
+    this.setPrompt(`In the game, locations are maked with different colors, each representing points.`)
+    await this.button()
+
+    this.setPrompt(`Yellow locations offer positive points, while blue locations have negative points.`)
+    await this.button()
+
+    this.setPrompt(`In the non-practice games, those points will become a cash bonus!`)
+    await this.button()
+
+    this.setPrompt(`Now make a move to collect points.`)
+    await cg.navigate()
+
+    await this.button()
+    this.runNext()
+
+  }
+
   async stage_transition() {
-    this.setPrompt(`
-      Both the connections and points change on every round of the game.
-    `)
+    this.setPrompt(`Both the connections and points change on every round of the game.`)
     let trial = {...this.trials.vary_transition[0], revealed: true}
     cg = new CircleGraph(trial).attach(this.content);
     cg.showGraph()
     cg.setCurrentState(trial.start)
     await this.button()
 
-    this.setPrompt(`
-      When you get to a location with no outgoing connections, the round ends.<br>
-    `)
-    let terminal = _.keys(_.pickBy(cg.graph._adjacency, _.isEmpty))
-    for (const s of terminal) {
-      cg.highlight(s)
-    }
-    await this.button()
-    for (const s of terminal) {
-      cg.unhighlight(s)
-    }
+    // this.setPrompt(`When you get to a location with no outgoing connections, the round ends.<br>`)
+    // // let terminal = _.keys(_.pickBy(cg.graph._adjacency, _.isEmpty))
+    // // for (const s of terminal) {
+    // //   cg.highlight(s)
+    // // }
+    // await this.button()
+    // // for (const s of terminal) {
+    // //   cg.unhighlight(s)
+    // // }
 
-    this.setPrompt(`
-      Try to make as many points as you can!
-    `)
+    this.setPrompt(`Try to make as many points as you can!`)
     await cg.navigate()
     this.runNext()
   }
@@ -171,32 +235,35 @@ class GraphInstructions extends Instructions {
   }
 
   async stage_incentives() {
-    this.setPrompt(`
-      _What's in it for me?_ you might be asking. Well, we thought of that!
-      Unlike other experiments you might have done, we don't have a fixed number of rounds.
-    `)
-    await this.button()
-    let goal
-    if (PARAMS.time_limit) {
-      goal = 'earn the most money'
-      let time_limit = PARAMS.time_limit / 60
-      this.setPrompt(`
-        Instead, you will have **${time_limit} minutes** to collect **as many points as you can.**
-        At the end of the experiment, we will convert those points into a cash bonus:
-        **${this.options.bonus.describeScheme()}.**
-      `)
-      await this.button()
-    } else {
-      goal = 'finish the study as quickly as possible'
-      this.setPrompt(`
-        Instead, you will do as **as many rounds as it takes** to earn **${PARAMS.score_limit} points.**
-      `)
-      await this.button()
-    }
-    this.setPrompt(`
-      To ${goal}, you'll have to balance making fast choices and selecting the
-      best possible path.
-    `)
+    // this.setPrompt(`
+    //   _What's in it for me?_ you might be asking. Well, we thought of that!
+    //   Unlike other experiments you might have done, we don't have a fixed number of rounds.
+    // `)
+    // await this.button()
+    // let goal
+    // if (PARAMS.time_limit) {
+    //   goal = 'earn the most money'
+    //   let time_limit = PARAMS.time_limit / 60
+    //   this.setPrompt(`
+    //     Instead, you will have **${time_limit} minutes** to collect **as many points as you can.**
+    //     At the end of the experiment, we will convert those points into a cash bonus:
+    //     **${this.options.bonus.describeScheme()}.**
+    //   `)
+    //   await this.button()
+    // } else {
+    //   goal = 'finish the study as quickly as possible'
+    //   this.setPrompt(`
+    //     Instead, you will do as **as many rounds as it takes** to earn **${PARAMS.score_limit} points.**
+    //   `)
+    //   await this.button()
+    // }
+    // this.setPrompt(`
+    //   To ${goal}, you'll have to balance making fast choices and selecting the
+    //   best possible path.
+    // `)
+
+
+    this.setPrompt(`You will have 100 rounds to collect **as many points as you can**.`)
     await this.button()
     this.runNext()
   }
@@ -331,7 +398,7 @@ class GraphInstructions extends Instructions {
      await hoveredAll
 
      this.setPrompt(`
-       When you're ready to select your moves, click on your current location (the blue one).
+       When you're ready to select your moves, click on your current location (the red one).
     `)
      await cg.enableExitImagination()
      this.setPrompt(`

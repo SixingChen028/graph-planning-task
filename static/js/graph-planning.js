@@ -47,149 +47,6 @@ function circleXY(N) {
   });
 }
 
-// function traverseTree(numNodes) {
-//   const traversalOrder = [];
-
-//   function traverse(nodeIndex) {
-//     if (nodeIndex >= numNodes || nodeIndex < 0) {
-//       return;
-//     }
-
-//     traversalOrder.push(nodeIndex);
-
-//     const leftChild = 2 * nodeIndex + 1;
-//     const rightChild = 2 * nodeIndex + 2;
-//     traverse(leftChild);
-//     traverse(rightChild);
-//   }
-
-//   traverse(0);
-//   return traversalOrder;
-// }
-
-// no shuffling version
-// function circleXY(N) {
-//   const branchingFactor = 2;
-//   const positions = [[0.5, 0.0]];
-
-//   let depth = 0;
-//   let level = 0;
-//   while (level < N - 1) {
-//     depth += 1;
-//     level += branchingFactor ** depth;
-//   }
-
-//   const deltaY = 1.0 / depth;
-
-//   for (let d = 1; d <= depth; d++) {
-//     const deltaX = 1.0 / (branchingFactor ** d);
-//     for (let i = 0; i < branchingFactor ** d; i++) {
-//       const x = (i + 0.5) * deltaX;
-//       const y = d * deltaY;
-//       positions.push([x, y]);
-//     }
-//   }
-
-//   const positionsOrdered = [];
-//   const order = traverseTree(N);
-//   for (let i = 0; i < N; i++) {
-//     positionsOrdered.push(positions[order[i]]);
-//   }
-
-//   return positionsOrdered;
-// }
-
-// function circleXY(N) {
-//   const branchingFactor = 2;
-//   const positions = [[0.5, 0.0]];
-//   let depth = 0;
-//   let level = 0;
-
-//   while (level < N - 1) {
-//     depth += 1;
-//     level += branchingFactor ** depth;
-//   }
-
-//   const deltaY = 1.0 / depth;
-
-//   for (let d = 1; d <= depth; d++) {
-//     const deltaX = 1.0 / (branchingFactor ** d);
-//     const levelPositions = [];
-
-//     for (let i = 0; i < branchingFactor ** d; i++) {
-//       const x = (i + 0.5) * deltaX;
-//       const y = d * deltaY;
-//       levelPositions.push([x, y]);
-//     }
-
-//     // Shuffle positions at this depth
-//     for (let i = levelPositions.length - 1; i > 0; i--) {
-//       const j = Math.floor(Math.random() * (i + 1));
-//       [levelPositions[i], levelPositions[j]] = [levelPositions[j], levelPositions[i]];
-//     }
-
-//     positions.push(...levelPositions);
-//   }
-
-//   const positionsOrdered = [];
-//   const order = traverseTree(N);
-
-//   for (let i = 0; i < N; i++) {
-//     positionsOrdered.push(positions[order[i]]);
-//   }
-
-//   return positionsOrdered;
-// }
-
-
-// function circleXY(N) {
-//   const branchingFactor = 2;
-//   const positions = [[0.5, 0.0]];
-//   let depth = 0;
-//   let level = 0;
-
-//   while (level < N - 1) {
-//     depth += 1;
-//     level += branchingFactor ** depth;
-//   }
-
-//   const deltaY = 1 / ((depth ) * (depth + 1) / 2);
-
-//   for (let d = 1; d <= depth; d++) {
-//     const deltaX = 1.0 / (branchingFactor ** d);
-//     const levelPositions = [];
-
-//     for (let i = 0; i < branchingFactor ** d; i++) {
-//       const x = (i + 0.5) * deltaX;
-//       const y = (d * (d + 1)) / 2 * deltaY;
-//       levelPositions.push([x, y]);
-//     }
-
-//     // Shuffle positions at this depth
-//     for (let i = levelPositions.length - 1; i > 0; i--) {
-//       const j = Math.floor(Math.random() * (i + 1));
-//       [levelPositions[i], levelPositions[j]] = [levelPositions[j], levelPositions[i]];
-//     }
-
-//     positions.push(...levelPositions);
-//   }
-
-//   const positionsOrdered = [];
-//   const order = traverseTree(N);
-
-//   for (let i = 0; i < N; i++) {
-//     positionsOrdered.push(positions[order[i]]);
-//   }
-
-//   return positionsOrdered;
-// }
-
-
-
-
-
-
-
 
 function treeXY(start, graph) {
   let xy = Array(graph.states.length).fill([])
@@ -384,14 +241,14 @@ class CircleGraph {
     msg.remove()
 
     await sleep(200)
-    if (this.options.n_steps > 0) {
-      let moves = $('<p>')
-      .text(numString(this.options.n_steps, "move"))
-      .addClass('Graph-moves')
-      .appendTo(this.root)
-      await sleep(1000)
-      moves.remove()
-    }
+    // if (this.options.n_steps > 0) {
+    //   let moves = $('<p>')
+    //   .text(numString(this.options.n_steps, "move"))
+    //   .addClass('Graph-moves')
+    //   .appendTo(this.root)
+    //   await sleep(1000)
+    //   moves.remove()
+    // }
     this.showGraph()
   }
 
@@ -550,6 +407,11 @@ class CircleGraph {
     this.onStateVisit(state);
 
     this.setCurrentState(state);
+
+
+    this.showRewardSymbol(state); // show reward symbols
+
+
     if (!initial) {
       this.addPoints(this.rewards[state], state)
       if (this.options.consume) {
@@ -558,7 +420,7 @@ class CircleGraph {
         // let sign = (points < 0) ? "" : "+"
         await sleep(200)
         $(`.GraphNavigation-State-${state} > .GraphReward`).addClass('floatup')
-        // $(`.GraphNavigation-State-${state} > .GraphReward`).remove()
+        // $(`.GraphNavigation-State-${state} > .GraphReward`).remove() // controls the floatup of the colors
       }
     }
   }
@@ -607,6 +469,13 @@ class CircleGraph {
         await sleep(500)
         this.showOutgoingEdges(state)
       }
+
+
+      // execute rollout here
+      await this.executeRollout()
+
+
+
       path.push(state)
 
       stepsLeft -= 1;
@@ -667,14 +536,48 @@ class CircleGraph {
   }
 
   async executeRollout() {
-    let children = this.graph.successors(this.state)
-    if (children.length == 0) {
-      return
-    } else {
-      let child = _.sample(children)
-      this.visitState(child)
-      await sleep(500)
+    let rolloutPath = [this.state]; // Store the rollout path
+
+    while (true) {
+      let children = this.graph.successors(this.state);
+      if (children.length === 0) {
+        break;
+      } else {
+        let child = _.sample(children);
+        rolloutPath.push(child); // Add the child to the rollout path
+
+        this.state = child; // Update the current state to the child state
+      }
     }
+
+    // Sequentially light up the states in the rollout path
+    for (const state of rolloutPath) {
+      this.visitState(state);
+      await sleep(800);
+    }
+  }
+
+  // Function to dynamically show reward symbols
+  async showRewardSymbol(state) {
+    let reward = this.rewards[state];
+
+    const minValue = -8;
+    const maxValue = 8;
+
+    $(this.el.querySelector(`.GraphNavigation-State-${state}`))
+    .append(
+      $(`<div>`)
+        .css({
+          position: 'absolute',
+          top: '-45px', // Move up by 50 pixels
+          left: '45px', // Move right by 30 pixels
+          transform: 'none', // Cancel any transformation to use the offset directly
+          fontSize: '5rem', // Adjust the font size as needed
+          color: getColorForValue(reward, minValue, maxValue),
+        })
+        .html(`${reward == 0 ? '' : ensureSign(reward)}`)
+        .addClass(reward < 0 ? "loss" : "win")
+    )
   }
 
   async showForcedHovers(start=0, stop) {
@@ -799,6 +702,7 @@ class CircleGraph {
     this.rewards[state] = parseFloat(reward)
     // let graphic = this.options.rewardGraphics[reward]
 
+    // original version of reward symbols
     // we have to use the default querySelector because this.el hasn't
     // been added to the DOM yet
     // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).html(
@@ -807,40 +711,38 @@ class CircleGraph {
     //   `).addClass(reward < 0 ? "loss" : "win")
     // )
 
+
+    // green-red version of reward colors
+    // function interpolateColor(color1, color2, factor) {
+    //   if (arguments.length < 3) { factor = 0.5; }
+    //   var result = color1.slice();
+    //   for (var i = 0; i < 3; i++) {
+    //       result[i] = Math.round(result[i] + factor * (color2[i] - color1[i]));
+    //   }
+    //   return result;
+    // }
     
-    //// red or green
-    // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).css({
-    //   backgroundColor: reward > 0 ? "red" : "green"
-    // })
+    
+    // function getColorForValue(value, minValue, maxValue) {
+    //   if (value === 0) return 'transparent';
 
-    // gradient
-    // Define the color gradient
-    const colorGradient = {
-      "-8": "#00FF00",
-      "-4": "#33FF00",
-      "-2": "#66FF00",
-      "-1": "#99FF00",
-      "1": "#FF3300",
-      "2": "#FF6600",
-      "4": "#FF9900",
-      "8": "#FFCC00"
-    };
+    //   var minColor, maxColor;
+  
+    //   if (value > 0) {
+    //     minColor = [255, 255, 0]; // Yellow
+    //     maxColor = [0, 255, 0];   // Green
+    //   } else {
+    //     minColor = [255, 255, 0]; // Yellow
+    //     maxColor = [255, 0, 0];   // Red
+    //   }
+  
+    //   var factor = Math.abs(value) / maxValue;
+    //   return 'rgb(' + interpolateColor(minColor, maxColor, factor).join(',') + ')';
+    // }
 
-    // // Set node color based on reward
-    // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).css({
-    //   backgroundColor: colorGradient[reward]
-    // });
+    const minValue = -8;
+    const maxValue = 8;
 
-    // hovering
-    // $(this.el.querySelector(`.GraphNavigation-State-${state}`)).html(
-    //   $('<div>', {'class': 'GraphReward'}).css({
-    //     width: '7rem',
-    //     height: '7rem',
-    //     borderRadius: '100%',
-    //     position: 'static',
-    //     backgroundColor: colorGradient[reward],
-    //   })
-    // )
     $(this.el.querySelector(`.GraphNavigation-State-${state}`)).html(
       $('<div>', {'class': 'GraphReward'}).css({
         width: '6.6rem',
@@ -850,17 +752,25 @@ class CircleGraph {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        backgroundColor: colorGradient[reward],
+        backgroundColor: getColorForValue(reward, minValue, maxValue),
       })
+      // .append(
+      //   $(`<div>`)
+      //       .css({
+      //           position: 'absolute',
+      //           top: '-50px', // Move up by 50 pixels
+      //           left: '50px', // Move right by 30 pixels
+      //           transform: 'none', // Cancel any transformation to use the offset directly
+      //           fontSize: '5rem', // Adjust the font size as needed
+      //           color: getColorForValue(reward, minValue, maxValue),
+      //       })
+      //       .html(`${reward == 0 ? '' : ensureSign(reward)}`)
+      //       .addClass(reward < 0 ? "loss" : "win")
+      // )
+
     );
     
-
   }
-  
-
-
-
-  
 
   setRewards(rewards) {
     for (let s of _.range(this.rewards.length)) {
@@ -868,6 +778,43 @@ class CircleGraph {
     }
   }
 }
+
+
+
+
+
+// viridis version of reward colors
+// Key Viridis colors
+const viridisKeyColors = [
+  // [68, 1, 84],   // Dark purple
+  [59, 82, 139], // Blue
+  [33, 145, 140],// Greenish-blue
+  [94, 201, 98], // Green
+  [253, 231, 37] // Yellow
+];
+
+// Linear interpolation between two colors
+function lerpColor(color1, color2, factor) {
+  return color1.map((c, i) => Math.round(c + factor * (color2[i] - c)));
+}
+
+// Function to get interpolated Viridis color
+function getColorForValue(value, minValue, maxValue) {
+  if (value === 0) return 'transparent';
+
+  const normalizedValue = (value - minValue) / (maxValue - minValue);
+  const numSegments = viridisKeyColors.length - 1;
+  const segment = Math.min(numSegments - 1, Math.floor(normalizedValue * numSegments));
+  const localFactor = (normalizedValue * numSegments) - segment;
+
+  const color1 = viridisKeyColors[segment];
+  const color2 = viridisKeyColors[segment + 1];
+
+  return `rgb(${lerpColor(color1, color2, localFactor).join(', ')})`;
+}
+
+
+
 
 
 const stateTemplate = (state, options) => {
